@@ -1,0 +1,468 @@
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
+
+/* Services Section */
+.service-item:hover {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+.service-item:hover .icon i,
+.service-item:hover h3,
+.service-item:hover p {
+    color: var(--contrast-color);
+}
+
+.service-item .stretched-link {
+    color: var(--heading-color);
+    text-decoration: none;
+}
+
+.service-item:hover .stretched-link {
+    color: var(--contrast-color);
+}
+
+/* Doctors Section */
+.doctors .team-member {
+    background-color: var(--surface-color);
+    box-shadow: 0px 2px 15px rgba(0, 0, 0, 0.1);
+    position: relative;
+    border-radius: 5px;
+    transition: 0.5s;
+    padding: 30px;
+    height: 100%;
+}
+
+.doctors .team-member .pic {
+    overflow: hidden;
+    width: 150px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.doctors .team-member .pic img {
+    transition: ease-in-out 0.3s;
+}
+
+.doctors .team-member:hover .pic img {
+    transform: scale(1.1);
+}
+
+.doctors .team-member .member-info {
+    padding-left: 30px;
+}
+
+.doctors .team-member h4 {
+    font-weight: 700;
+    margin-bottom: 5px;
+    font-size: 20px;
+}
+
+.doctors .team-member span {
+    display: block;
+    font-size: 15px;
+    padding-bottom: 10px;
+    position: relative;
+    font-weight: 500;
+}
+
+.doctors .team-member span::after {
+    content: "";
+    position: absolute;
+    display: block;
+    width: 50px;
+    height: 1px;
+    background: color-mix(in srgb, var(--default-color), transparent 85%);
+    bottom: 0;
+    left: 0;
+}
+
+.testimonials .swiper-pagination {
+    margin-top: 20px;
+    position: relative;
+    text-align: center;
+}
+
+.testimonials .swiper-pagination .swiper-pagination-bullet {
+    width: 12px;
+    height: 12px;
+    background-color: #fff;
+    opacity: 1;
+    border: 1px solid var(--accent-color);
+    display: inline-block;
+    margin: 0 5px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.testimonials .swiper-pagination .swiper-pagination-bullet-active {
+    background-color: var(--accent-color);
+}
+
+.testimonials .section-title {
+    text-align: left;
+    margin-bottom: 0;
+}
+
+/* Gallery Section */
+.gallery .gallery-item {
+    overflow: hidden;
+    border-right: 3px solid var(--background-color);
+    border-bottom: 3px solid var(--background-color);
+}
+
+.gallery .gallery-item img {
+    transition: all ease-in-out 0.4s;
+}
+
+.gallery .gallery-item:hover img {
+    transform: scale(1.1);
+}
+
+/* Contact Section */
+.contact .info-item {
+    background: #fff;
+    padding: 30px;
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+
+.contact .info-item i {
+    font-size: 20px;
+    color: #fff;
+    float: left;
+    width: 44px;
+    height: 44px;
+    background: var(--accent-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50px;
+    transition: all 0.3s ease-in-out;
+    margin-right: 15px;
+}
+
+.contact .info-item h3 {
+    padding: 0;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 5px;
+    color: var(--heading-color);
+}
+
+.contact .info-item p {
+    padding: 0;
+    margin-bottom: 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.contact .info-item:hover i {
+    background: color-mix(in srgb, var(--accent-color), transparent 20%);
+    color: #fff;
+}
+
+.contact .php-email-form {
+    width: 100%;
+    background: #fff;
+    padding: 30px;
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+}
+
+.contact .php-email-form input,
+.contact .php-email-form textarea {
+    border-radius: 0;
+    box-shadow: none;
+    font-size: 14px;
+}
+
+.contact .php-email-form input:focus,
+.contact .php-email-form textarea:focus {
+    border-color: var(--accent-color);
+}
+
+.contact .php-email-form button[type="submit"] {
+    background: var(--accent-color);
+    border: 0;
+    padding: 10px 30px;
+    font-size: 16px;
+    transition: 0.3s;
+    cursor: pointer;
+    border-radius: 50px;
+}
+
+.contact .php-email-form button[type="submit"]:hover {
+    background: color-mix(in srgb, var(--accent-color), transparent 20%);
+}
+
+/* News Section */
+.news .news-item {
+    background: #fff;
+    padding: 15px 20px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    transition: 0.3s;
+}
+
+.news .news-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.news .news-date {
+    font-size: 14px;
+    color: #888;
+    font-weight: 500;
+    min-width: 100px;
+}
+
+.news .news-title {
+    color: var(--heading-color);
+    font-weight: 600;
+    text-decoration: none;
+    transition: 0.3s;
+    display: block;
+}
+
+.news .news-title:hover {
+    color: var(--accent-color);
+}
+
+.news .btn-read-more {
+    color: var(--accent-color);
+    font-size: 18px;
+}
+
+.news .btn-view-all {
+    display: inline-block;
+    padding: 10px 30px;
+    background: var(--accent-color);
+    color: #fff;
+    border-radius: 50px;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.news .btn-view-all:hover {
+    background: color-mix(in srgb, var(--accent-color), transparent 20%);
+}
+
+/* Related Links Section */
+.related-links .related-link-item {
+    display: block;
+    padding: 15px 15px;
+    text-align: left;
+    border-radius: 5px;
+    text-decoration: none;
+    color: var(--heading-color);
+    transition: 0.3s;
+    height: 100%;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+}
+
+.related-links .related-link-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.related-links .related-link-item span {
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.content-wrapper .container {
+    color: var(--heading-color);
+}
+
+.about .content .fst-italic {
+    font-size: 1.25rem;
+    color: #444;
+    margin-bottom: 1.5rem;
+}
+
+.about .content ul li {
+    font-size: 1.25rem;
+    color: #444;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.about .content ul li i {
+    font-size: 2.2rem;
+    margin-right: 15px;
+    color: var(--accent-color);
+    flex-shrink: 0;
+}
+
+.about .content p:last-child {
+    font-size: 1.25rem;
+    line-height: 1.8;
+    color: #444;
+}
+
+/* Sticky Header */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+
+body {
+    margin-top: 100px;
+    /* Adjust based on header height */
+    min-width: 1280px;
+    overflow-x: auto;
+}
+
+.header-scrolled {
+    box-shadow: 0px 0 18px rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.header-scrolled .topbar {
+    height: 0;
+    visibility: hidden;
+    overflow: hidden;
+}
+
+/* Custom News Tab Button */
+.btn-news-tab {
+    color: #1977cc;
+    border-color: #1977cc;
+    background-color: transparent;
+}
+
+.btn-news-tab:hover,
+.btn-news-tab.active {
+    background-color: #1977cc !important;
+    border-color: #1977cc !important;
+    color: #fff !important;
+}
+
+/* Global Page Spacing and Typography */
+.standard-page-content {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding-top: 50px;
+    padding-bottom: 80px;
+    padding-left: 20px;
+    padding-right: 20px;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 16px;
+    line-height: 1.8;
+    color: #374151;
+    /* gray-700 */
+}
+
+.standard-page-content h1 {
+    font-size: 32px !important;
+    font-weight: 700 !important;
+    color: #1977cc !important;
+    /* Theme blue */
+}
+
+.standard-page-content h2 {
+    font-size: 26px !important;
+    font-weight: 600 !important;
+    color: #2c3e50 !important;
+    border-left: 5px solid #1977cc;
+    padding-left: 15px;
+}
+
+.standard-page-content h3 {
+    font-size: 22px !important;
+    font-weight: 600 !important;
+    color: #34495e !important;
+}
+
+.standard-page-content h4 {
+    font-size: 20px !important;
+    font-weight: 600 !important;
+}
+
+.standard-page-content p,
+.standard-page-content li,
+.standard-page-content span,
+.standard-page-content div {
+    font-size: 16px !important;
+}
+
+/* Exception for icons or specific UI elements if needed */
+.standard-page-content i {
+    font-size: inherit;
+}
+
+/* Doctor Schedule Tabs */
+.doctor-schedule-tabs .ant-tabs-nav .ant-tabs-tab {
+    border: 1px solid #f0f0f0 !important;
+    margin-right: 8px !important;
+    border-radius: 8px 8px 0 0 !important;
+    background-color: #fff !important;
+    color: #666 !important;
+    font-weight: bold !important;
+    transition: all 0.3s;
+}
+
+.doctor-schedule-tabs .ant-tabs-nav .ant-tabs-tab:hover {
+    color: #fff !important;
+}
+
+/* Monday - Yellow */
+.doctor-schedule-tabs .ant-tabs-nav .ant-tabs-tab:nth-child(1):hover,
+.doctor-schedule-tabs .ant-tabs-nav .ant-tabs-tab:nth-child(1).ant-tabs-tab-active {
+    background-color: #FBC02D !important;
+    color: #fff !important;
+    border-color: #FBC02D !important;
+}
+
+/* Tuesday - Pink */
+.doctor-schedule-tabs .ant-tabs-nav .ant-tabs-tab:nth-child(2):hover,
+.doctor-schedule-tabs .ant-tabs-nav .ant-tabs-tab:nth-child(2).ant-tabs-tab-active {
+    background-color: #E91E63 !important;
+    color: #fff !important;
+    border-color: #E91E63 !important;
+}
+
+/* Wednesday - Green */
+.doctor-schedule-tabs .ant-tabs-nav .ant-tabs-tab:nth-child(3):hover,
+.doctor-schedule-tabs .ant-tabs-nav .ant-tabs-tab:nth-child(3).ant-tabs-tab-active {
+    background-color: #4CAF50 !important;
+    color: #fff !important;
+    border-color: #4CAF50 !important;
+}
+
+/* Thursday - Orange */
+.doctor-schedule-tabs .ant-tabs-nav .ant-tabs-tab:nth-child(4):hover,
+.doctor-schedule-tabs .ant-tabs-nav .ant-tabs-tab:nth-child(4).ant-tabs-tab-active {
+    background-color: #FF9800 !important;
+    color: #fff !important;
+    border-color: #FF9800 !important;
+}
+
+/* Friday - Blue */
+.doctor-schedule-tabs .ant-tabs-nav .ant-tabs-tab:nth-child(5):hover,
+.doctor-schedule-tabs .ant-tabs-nav .ant-tabs-tab:nth-child(5).ant-tabs-tab-active {
+    background-color: #2196F3 !important;
+    color: #fff !important;
+    border-color: #2196F3 !important;
+}
+
+/* Active State Styles */
+.doctor-schedule-tabs .ant-tabs-nav .ant-tabs-tab-active {
+    transform: translateY(-2px);
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.doctor-schedule-tabs .ant-tabs-nav .ant-tabs-tab-active .ant-tabs-tab-btn {
+    color: #fff !important;
+}
+
+.doctor-schedule-tabs .ant-tabs-nav .ant-tabs-tab:not(.ant-tabs-tab-active):hover {
+    opacity: 0.9;
+}
