@@ -1,21 +1,10 @@
 const express = require('express');
-const router = express.Router();
+const router = require('express').Router();
 const { poolPromise, sql } = require('../db');
 
-const multer = require('multer');
+const { createUpload, toBase64DataUrl } = require('../middleware/uploadMiddleware');
 
-// Configure Multer for PDF/File Uploads
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/');
-    },
-    filename: (req, file, cb) => {
-        // Fix Thai filename encoding
-        file.originalname = Buffer.from(file.originalname, 'latin1').toString('utf8');
-        cb(null, Date.now() + '-' + file.originalname);
-    }
-});
-const upload = multer({ storage: storage });
+const upload = createUpload();
 
 // --- Quick Menus ---
 // ... (Quick Menus routes remain unchanged) ...
@@ -100,12 +89,11 @@ router.get('/pr-news', async (req, res) => {
 
 // POST new news
 router.post('/pr-news', verifyToken, upload.single('file'), async (req, res) => {
-    // req.body contains text fields, req.file contains uploaded file
     const { title, date, description, urlType, externalUrl } = req.body;
     let finalUrl = '#';
 
     if (req.file) {
-        finalUrl = `/uploads/${req.file.filename}`;
+        finalUrl = toBase64DataUrl(req.file);
     } else if (externalUrl) {
         finalUrl = externalUrl;
     }
@@ -131,7 +119,7 @@ router.put('/pr-news/:id', verifyToken, upload.single('file'), async (req, res) 
     let finalUrl = existingUrl || '#';
 
     if (req.file) {
-        finalUrl = `/uploads/${req.file.filename}`;
+        finalUrl = toBase64DataUrl(req.file);
     } else if (urlType === 'link' && externalUrl) {
         finalUrl = externalUrl;
     }

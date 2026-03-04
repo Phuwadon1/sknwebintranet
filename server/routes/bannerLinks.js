@@ -1,21 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { poolPromise, sql } = require('../db');
-const multer = require('multer');
-const path = require('path');
+const { createUpload, toBase64DataUrl } = require('../middleware/uploadMiddleware');
 
-// Configure Multer
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/');
-    },
-    filename: (req, file, cb) => {
-        file.originalname = Buffer.from(file.originalname, 'latin1').toString('utf8');
-        cb(null, 'banner-' + Date.now() + '-' + file.originalname);
-    }
-});
-
-const upload = multer({ storage: storage });
+const upload = createUpload();
 
 // GET all banners
 router.get('/', async (req, res) => {
@@ -34,17 +22,13 @@ const verifyToken = require('../middleware/authMiddleware');
 router.post('/', verifyToken, upload.single('file'), async (req, res) => {
     try {
         const { title, url } = req.body;
-        let imageUrl = '';
-
-        if (req.file) {
-            imageUrl = `/uploads/${req.file.filename}`;
-        }
+        let imageUrl = req.file ? toBase64DataUrl(req.file) : (url || '');
 
         const pool = await poolPromise;
         await pool.request()
             .input('title', sql.NVarChar, title)
-            .input('imageUrl', sql.NVarChar, imageUrl)
-            .input('targetUrl', sql.NVarChar, url)
+            .input('imageUrl', sql.NVarChar(sql.MAX), imageUrl)
+            .input('targetUrl', sql.NVarChar, url || '')
             .query('INSERT INTO BannerLinks (Title, ImageUrl, TargetUrl) VALUES (@title, @imageUrl, @targetUrl)');
 
         res.status(201).json({ message: 'Banner created successfully' });
@@ -59,17 +43,17 @@ router.put('/:id', verifyToken, upload.single('file'), async (req, res) => {
     try {
         const { id } = req.params;
         const { title, url } = req.body;
-        let imageUrl = req.body.existingImage; // Sent if no new file
+        let imageUrl = req.body.existingImage;
 
         if (req.file) {
-            imageUrl = `/uploads/${req.file.filename}`;
+            imageUrl = toBase64DataUrl(req.file);
         }
 
         const pool = await poolPromise;
         await pool.request()
             .input('id', sql.Int, id)
             .input('title', sql.NVarChar, title)
-            .input('imageUrl', sql.NVarChar, imageUrl)
+            .input('imageUrl', sql.NVarChar(sql.MAX), imageUrl)
             .input('targetUrl', sql.NVarChar, url)
             .query('UPDATE BannerLinks SET Title = @title, ImageUrl = @imageUrl, TargetUrl = @targetUrl WHERE ID = @id');
 

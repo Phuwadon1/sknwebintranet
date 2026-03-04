@@ -2,22 +2,9 @@
 const express = require('express');
 const router = express.Router();
 const { poolPromise, sql } = require('../db');
-const multer = require('multer');
-const path = require('path');
+const { createUpload, toBase64DataUrl } = require('../middleware/uploadMiddleware');
 
-// Configure Multer
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/');
-    },
-    filename: (req, file, cb) => {
-        // Handle Thai characters
-        file.originalname = Buffer.from(file.originalname, 'latin1').toString('utf8');
-        cb(null, 'activity-' + Date.now() + '-' + file.originalname);
-    }
-});
-
-const upload = multer({ storage: storage });
+const upload = createUpload();
 
 // GET photos by category
 router.get('/:category', async (req, res) => {
@@ -44,17 +31,17 @@ router.post('/', verifyToken, upload.single('file'), async (req, res) => {
         return res.status(400).json({ message: 'No file uploaded' });
     }
 
-    const imagePath = `/uploads/${file.filename}`;
+    const imageData = toBase64DataUrl(file);
 
     try {
         const pool = await poolPromise;
         await pool.request()
             .input('Category', sql.NVarChar, category)
             .input('Title', sql.NVarChar, title || '')
-            .input('ImagePath', sql.NVarChar, imagePath)
+            .input('ImagePath', sql.NVarChar(sql.MAX), imageData)
             .query('INSERT INTO ActivityPhotos (category, title, image_path) VALUES (@Category, @Title, @ImagePath)');
 
-        res.json({ message: 'Photo uploaded successfully', imagePath });
+        res.json({ message: 'Photo uploaded successfully' });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: err.message });

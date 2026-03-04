@@ -1,28 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const sql = require('mssql');
-const { poolPromise } = require('../db'); // Assuming db.js exports poolPromise
-const fs = require('fs');
-const path = require('path');
-const multer = require('multer');
-const verifyToken = require('../middleware/authMiddleware'); // Assuming this exists
+const { poolPromise } = require('../db');
+const { createUpload, toBase64DataUrl } = require('../middleware/uploadMiddleware');
+const verifyToken = require('../middleware/authMiddleware');
 
-// Configure Multer for File Uploads
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const uploadPath = path.join(__dirname, '../uploads/health_knowledge');
-        if (!fs.existsSync(uploadPath)) {
-            fs.mkdirSync(uploadPath, { recursive: true });
-        }
-        cb(null, uploadPath);
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + path.extname(file.originalname));
-    }
-});
-
-const upload = multer({ storage: storage });
+const upload = createUpload();
 
 // GET All Items
 router.get('/', async (req, res) => {
@@ -36,23 +19,23 @@ router.get('/', async (req, res) => {
     }
 });
 
-// POST Create Item (Admin Only - simplified verifyToken usage)
+// POST Create Item
 router.post('/', verifyToken, upload.fields([{ name: 'image', maxCount: 1 }, { name: 'file', maxCount: 1 }]), async (req, res) => {
     try {
         const { title, category, content, link } = req.body;
         const imageFile = req.files['image'] ? req.files['image'][0] : null;
         const docFile = req.files['file'] ? req.files['file'][0] : null;
 
-        let imagePath = imageFile ? `/uploads/health_knowledge/${imageFile.filename}` : null;
-        let filePath = docFile ? `/uploads/health_knowledge/${docFile.filename}` : (link || null);
+        const imagePath = imageFile ? toBase64DataUrl(imageFile) : null;
+        const filePath = docFile ? toBase64DataUrl(docFile) : (link || null);
 
         const pool = await poolPromise;
         await pool.request()
             .input('title', sql.NVarChar, title)
             .input('category', sql.NVarChar, category)
             .input('content', sql.NVarChar, content)
-            .input('file_path', sql.NVarChar, filePath)
-            .input('image_path', sql.NVarChar, imagePath)
+            .input('file_path', sql.NVarChar(sql.MAX), filePath)
+            .input('image_path', sql.NVarChar(sql.MAX), imagePath)
             .query(`INSERT INTO HealthKnowledge (title, category, content, file_path, image_path, created_at) 
                     VALUES (@title, @category, @content, @file_path, @image_path, GETDATE())`);
 
@@ -73,11 +56,8 @@ router.put('/:id', verifyToken, upload.fields([{ name: 'image', maxCount: 1 }, {
 
         const pool = await poolPromise;
 
-        // Build update query dynamically
         let query = `UPDATE HealthKnowledge SET 
-                     title = @title, 
-                     category = @category, 
-                     content = @content, 
+                     title = @title, category = @category, content = @content, 
                      updated_at = GETDATE()`;
 
         const request = pool.request()
@@ -87,17 +67,15 @@ router.put('/:id', verifyToken, upload.fields([{ name: 'image', maxCount: 1 }, {
             .input('content', sql.NVarChar, content);
 
         if (imageFile) {
-            const imagePath = `/uploads/health_knowledge/${imageFile.filename}`;
-            request.input('image_path', sql.NVarChar, imagePath);
+            request.input('image_path', sql.NVarChar(sql.MAX), toBase64DataUrl(imageFile));
             query += `, image_path = @image_path`;
         }
 
         if (docFile) {
-            const filePath = `/uploads/health_knowledge/${docFile.filename}`;
-            request.input('file_path', sql.NVarChar, filePath);
+            request.input('file_path', sql.NVarChar(sql.MAX), toBase64DataUrl(docFile));
             query += `, file_path = @file_path`;
         } else if (link) {
-            request.input('link_path', sql.NVarChar, link);
+            request.input('link_path', sql.NVarChar(sql.MAX), link);
             query += `, file_path = @link_path`;
         }
 
@@ -117,37 +95,9 @@ router.delete('/:id', verifyToken, async (req, res) => {
     try {
         const { id } = req.params;
         const pool = await poolPromise;
-
-        // Get file paths to delete
-        const result = await pool.request()
-            .input('id', sql.Int, id)
-            .query('SELECT image_path, file_path FROM HealthKnowledge WHERE id = @id');
-
-        if (result.recordset.length > 0) {
-            const { image_path, file_path } = result.recordset[0];
-
-            // Helper to delete file
-            const deleteFile = (relativePath) => {
-                if (!relativePath) return;
-                // Check if it's a local file (starts with /uploads)
-                if (relativePath.startsWith('/uploads/')) {
-                    const absolutePath = path.join(__dirname, '..', relativePath);
-                    if (fs.existsSync(absolutePath)) {
-                        try {
-                            fs.unlinkSync(absolutePath);
-                        } catch (e) { console.error("Error deleting file:", e); }
-                    }
-                }
-            };
-
-            deleteFile(image_path);
-            deleteFile(file_path);
-        }
-
         await pool.request()
             .input('id', sql.Int, id)
             .query('DELETE FROM HealthKnowledge WHERE id = @id');
-
         res.json({ message: 'Deleted successfully' });
     } catch (err) {
         console.error(err);

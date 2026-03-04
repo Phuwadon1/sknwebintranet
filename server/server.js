@@ -8,6 +8,11 @@ const cors = require('cors');
 const authRoutes = require('./routes/auth');
 const scheduleRoutes = require('./routes/schedules');
 
+// Migrations — run on startup
+const { ensureMaxColumns } = require('./migrations/ensureMaxColumns');
+const { migrateFilesToDb } = require('./migrations/migrateFilesToDb');
+
+
 const app = express();
 const PORT = process.env.PORT || 8083;
 
@@ -53,6 +58,9 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(distPath, 'index.html'));
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
     console.log(`Server is running on port ${PORT}`);
+    // Run DB migrations on startup
+    await ensureMaxColumns();
+    await migrateFilesToDb();
 });

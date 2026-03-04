@@ -1,24 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const { poolPromise, sql } = require('../db');
-const multer = require('multer');
-const path = require('path');
+const { createUpload, toBase64DataUrl } = require('../middleware/uploadMiddleware');
+const verifyToken = require('../middleware/authMiddleware');
 
-// Configure Multer (Same as schedules.js)
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/');
-    },
-    filename: (req, file, cb) => {
-        // Fix Thai filename encoding
-        file.originalname = Buffer.from(file.originalname, 'latin1').toString('utf8');
-        // Prevent generic overwrites if possible, but user insisted on original names for schedules. 
-        // For news, might be safer to keep original too.
-        cb(null, file.originalname);
-    }
-});
-
-const upload = multer({ storage: storage });
+const upload = createUpload();
 
 // GET all news
 router.get('/', async (req, res) => {
@@ -27,12 +13,10 @@ router.get('/', async (req, res) => {
         const newsResult = await pool.request().query('SELECT * FROM News ORDER BY ID DESC');
         const attachResult = await pool.request().query('SELECT * FROM NewsAttachments');
 
-        const news = newsResult.recordset.map(item => {
-            return {
-                ...item,
-                Attachments: attachResult.recordset.filter(a => a.NewsID === item.ID)
-            };
-        });
+        const news = newsResult.recordset.map(item => ({
+            ...item,
+            Attachments: attachResult.recordset.filter(a => a.NewsID === item.ID)
+        }));
 
         res.json(news);
     } catch (err) {
@@ -40,53 +24,39 @@ router.get('/', async (req, res) => {
     }
 });
 
-const verifyToken = require('../middleware/authMiddleware');
-
 // POST new news item
 router.post('/', verifyToken, upload.array('files'), async (req, res) => {
-    console.log('--- POST /api/news CALLED ---');
-    console.log('Body:', req.body);
-    console.log('Files:', req.files);
-
     const { title, date, category } = req.body;
     let fileNames = req.body.fileNames;
 
-    // Normalize fileNames to array
-    if (!fileNames) {
-        fileNames = [];
-    } else if (!Array.isArray(fileNames)) {
-        fileNames = [fileNames];
-    }
+    if (!fileNames) fileNames = [];
+    else if (!Array.isArray(fileNames)) fileNames = [fileNames];
 
-    // For backward compatibility or primary display, use the first file as main FilePath, or just '#'
     const firstFile = req.files && req.files.length > 0 ? req.files[0] : null;
-    const mainFilePath = firstFile ? `/uploads/${firstFile.filename}` : '#';
+    const mainFilePath = firstFile ? toBase64DataUrl(firstFile) : '#';
 
     try {
         const pool = await poolPromise;
 
-        // 1. Insert News
         const result = await pool.request()
             .input('Title', sql.NVarChar, title)
             .input('Date', sql.NVarChar, date)
             .input('Category', sql.NVarChar, category)
-            .input('FilePath', sql.NVarChar, mainFilePath)
+            .input('FilePath', sql.NVarChar(sql.MAX), mainFilePath)
             .query('INSERT INTO News (Title, Date, Category, FilePath) OUTPUT INSERTED.ID VALUES (@Title, @Date, @Category, @FilePath)');
 
         const newsId = result.recordset[0].ID;
 
-        // 2. Insert Attachments
         if (req.files && req.files.length > 0) {
             for (let i = 0; i < req.files.length; i++) {
                 const file = req.files[i];
-                // Use custom name if provided, else original name
                 const displayName = (fileNames[i] && fileNames[i].trim() !== '') ? fileNames[i] : file.originalname;
-                const filePath = `/uploads/${file.filename}`;
+                const fileData = toBase64DataUrl(file);
 
                 await pool.request()
                     .input('NewsID', sql.Int, newsId)
                     .input('FileName', sql.NVarChar, displayName)
-                    .input('FilePath', sql.NVarChar, filePath)
+                    .input('FilePath', sql.NVarChar(sql.MAX), fileData)
                     .query('INSERT INTO NewsAttachments (NewsID, FileName, FilePath) VALUES (@NewsID, @FileName, @FilePath)');
             }
         }
@@ -104,12 +74,8 @@ router.put('/:id', verifyToken, upload.array('files'), async (req, res) => {
     const { title, date, category } = req.body;
     let fileNames = req.body.fileNames;
 
-    // Normalize fileNames to array
-    if (!fileNames) {
-        fileNames = [];
-    } else if (!Array.isArray(fileNames)) {
-        fileNames = [fileNames];
-    }
+    if (!fileNames) fileNames = [];
+    else if (!Array.isArray(fileNames)) fileNames = [fileNames];
 
     try {
         const pool = await poolPromise;
@@ -118,20 +84,18 @@ router.put('/:id', verifyToken, upload.array('files'), async (req, res) => {
             .input('Title', sql.NVarChar, title)
             .input('Date', sql.NVarChar, date)
             .input('Category', sql.NVarChar, category)
-            // .input('FilePath', sql.NVarChar, newFilePath) // Skip updating main file path for now unless we decide policy
             .query('UPDATE News SET Title = @Title, Date = @Date, Category = @Category WHERE ID = @ID');
 
-        // Add new attachments if any
         if (req.files && req.files.length > 0) {
             for (let i = 0; i < req.files.length; i++) {
                 const file = req.files[i];
                 const displayName = (fileNames[i] && fileNames[i].trim() !== '') ? fileNames[i] : file.originalname;
-                const filePath = `/uploads/${file.filename}`;
+                const fileData = toBase64DataUrl(file);
 
                 await pool.request()
                     .input('NewsID', sql.Int, id)
                     .input('FileName', sql.NVarChar, displayName)
-                    .input('FilePath', sql.NVarChar, filePath)
+                    .input('FilePath', sql.NVarChar(sql.MAX), fileData)
                     .query('INSERT INTO NewsAttachments (NewsID, FileName, FilePath) VALUES (@NewsID, @FileName, @FilePath)');
             }
         }
@@ -148,8 +112,6 @@ router.delete('/:id', verifyToken, async (req, res) => {
     const { id } = req.params;
     try {
         const pool = await poolPromise;
-        // Delete Attachments first (though ON DELETE CASCADE might handle it if set, but explicit is safe)
-        // I set ON DELETE CASCADE in creation script, so deleting News is enough.
         await pool.request()
             .input('ID', sql.Int, id)
             .query('DELETE FROM News WHERE ID = @ID');

@@ -8,9 +8,10 @@ const config = {
     password: process.env.DB_PASSWORD,
     server: process.env.DB_SERVER,
     database: process.env.DB_DATABASE,
+    requestTimeout: 300000, // 5 minutes — needed for large Base64 file inserts
     options: {
-        encrypt: true, // Use this if you're on Windows Azure
-        trustServerCertificate: true // Change to true for local dev / self-signed certs
+        encrypt: true,
+        trustServerCertificate: true
     }
 };
 
