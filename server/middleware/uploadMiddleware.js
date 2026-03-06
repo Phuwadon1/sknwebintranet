@@ -1,24 +1,26 @@
 const multer = require('multer');
+const path = require('path');
 
-// Use memory storage — file is available as req.file.buffer
+// Disk storage for large files (Schedules, News, Downloads)
+const diskStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, path.join(__dirname, '../uploads'));
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+// Memory storage for small data (Base64 migration)
 const memStorage = multer.memoryStorage();
 
-/**
- * Creates a multer upload instance with memory storage.
- * Usage: const upload = createUpload();
- */
-const createUpload = (options = {}) => multer({
-    storage: memStorage,
-    limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB max
+const createUpload = (type = 'disk', options = {}) => multer({
+    storage: type === 'disk' ? diskStorage : memStorage,
+    limits: { fileSize: 100 * 1024 * 1024 }, // 100 MB max for disk
     ...options
 });
 
-/**
- * Converts a multer file (req.file) to a Base64 data-URL string.
- * Returns null if file is not provided.
- * @param {object} file - req.file from multer
- * @returns {string|null}
- */
 const toBase64DataUrl = (file) => {
     if (!file || !file.buffer) return null;
     const mimeType = file.mimetype || 'application/octet-stream';

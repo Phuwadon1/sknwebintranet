@@ -79,15 +79,15 @@ async function migrateFilesToDb() {
 
         await migrateTable(pool, 'ActivityPhotos', 'id', 'image_path');
         await migrateTable(pool, 'BannerLinks', 'ID', 'ImageUrl');
-        await migrateTable(pool, 'Schedules', 'ID', 'FilePath');
-        await migrateTable(pool, 'RelatedLinks', 'ID', 'Url');
+        // await migrateTable(pool, 'Schedules', 'ID', 'FilePath');
+        // await migrateTable(pool, 'RelatedLinks', 'ID', 'Url');
         await migrateTable(pool, 'ChiefProfile', 'id', 'image_path');
         await migrateTable(pool, 'ExecutiveBoard', 'id', 'image_path');
         await migrateTable(pool, 'Departments', 'id', 'image_path');
         await migrateTable(pool, 'NursingPRNews', 'ID', 'Url');
         // Previously missing routes
-        await migrateTable(pool, 'News', 'ID', 'FilePath');
-        await migrateTable(pool, 'NewsAttachments', 'ID', 'FilePath');
+        // await migrateTable(pool, 'News', 'ID', 'FilePath');
+        // await migrateTable(pool, 'NewsAttachments', 'ID', 'FilePath');
         await migrateTable(pool, 'Posters', 'id', 'image_path');
         await migrateTable(pool, 'Posters', 'id', 'link_url');
         await migrateTable(pool, 'OrgChart', 'Id', 'Photo');

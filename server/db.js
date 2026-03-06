@@ -16,7 +16,7 @@ const config = {
 };
 
 const poolPromise = new sql.ConnectionPool(config)
-    .connect()
+    .connect()  
     .then(pool => {
         console.log('Connected to SQL Server');
         return pool;

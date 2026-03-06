@@ -14,7 +14,7 @@ const { migrateFilesToDb } = require('./migrations/migrateFilesToDb');
 
 
 const app = express();
-const PORT = process.env.PORT || 8083;
+const PORT = process.env.PORT || 8082;
 
 app.use(cors());
 app.use(express.json());
